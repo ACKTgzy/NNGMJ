@@ -1,16 +1,17 @@
 #include<iostream>
 #include<filesystem>
 #include<fstream>
+#include<vector>
 using namespace std;
 
 class NNGMJ {
 private:
-    short LS = 94;
-    char ZD[94] = { '5','y','+','8','H','=','z','F',',','A','i','E','4','Z','p','_','V','W','X','k','s','b','D','r','C','6','S','2',';','"','a','c','n','\'','{','o','0','1','Q','(',')','}','[','R','t','u','M','q','7','w','x',']','\\','|','~','`','!','@','#','J','K','L','9','l','B','g','h','3','O','P','m','$','%','^','&','*','N','G','-','j','I','<','U','>','T','Y','/','?',':','d','.','e','f','v'};
+    short LS = 95;
+    char ZD[95] = { '5','y','+','8','H','=','z','F',',','A','i','E','4','Z','p','_','V','W',' ','X','k','s','b','D','r','C','6','S','2',';','"','a','c','n','\'','{','o','0','1','Q','(',')','}','[','R','t','u','M','q','7','w','x',']','\\','|','~','`','!','@','#','J','K','L','9','l','B','g','h','3','O','P','m','$','%','^','&','*','N','G','-','j','I','<','U','>','T','Y','/','?',':','d','.','e','f','v'};
     short MY[5];
 public:
     struct MYANDDATA {
-        string Data;
+        std::string Data;
         short MY[5];
     };
     short whereZD(char b) {
@@ -20,7 +21,7 @@ public:
         cout<<"error"<<endl;
         exit(-1);
     }
-    MYANDDATA Nngmj(string data, short m1 = 5, short m2 = 5, short m3 = 5, short m4 = 5, short m5 = 5) {
+    MYANDDATA Nngmj(std::string data, short m1 = 5, short m2 = 5, short m3 = 5, short m4 = 5, short m5 = 5) {
         MYANDDATA sdata;
         sdata.MY[0] = m1;
         sdata.MY[1] = m2;
@@ -125,6 +126,7 @@ public:
             case '-':
             case '+':
             case '=':
+            case ' ':
                 sdata.Data += ZD[((m5 * 2401) + (m4 * 343) + (m3 * 49) + (m2 * 7) + m1 + whereZD(a)) % LS];
                 m1++;
                 break;
@@ -201,7 +203,87 @@ public:
     }
 };
 
-string duru(string whereFile) {
+class BASE64{
+    friend class NNGMJ;
+private:
+    const std::string base64bin = "ASDFGHJKLZXCVBNMQWERTYUIOPasdfghjklzxcvbnmqwertyuiop1234567890+/";
+    std::string base64_encode(const std::string &input){
+        std::string output;
+        short i=0;
+        short j=0;
+        unsigned char carry_3[3];
+        unsigned char carry_4[4];
+        for(const char c : input){
+            carry_3[i++] = c;
+            if(i == 3){
+                carry_4[0] = (carry_3[0] & 0xfc) >> 2;
+                carry_4[1] = ((carry_3[0] & 0x03) << 4) + ((carry_3[1] & 0xf0) >> 4);
+                carry_4[2] = ((carry_3[1] & 0x0f) << 2) + ((carry_3[2] & 0xc0) >> 6);
+                carry_4[3] = (carry_3[2] & 0x3f);
+                for(i = 0;i < 4;i++)output += base64bin[carry_4[i]];
+                i = 0;
+            }
+        }
+        if(i > 0){
+            for(j = i;j < 3;j++){
+                carry_3[j] = '\0';
+                carry_4[0] = (carry_3[0] & 0xfc) >> 2;
+                carry_4[1] = ((carry_3[0] & 0x03) << 4) + ((carry_3[1] & 0xf0) >> 4);
+                carry_4[2] = ((carry_3[1] & 0x0f) << 2) + ((carry_3[2] & 0xc0) >> 6);
+                carry_4[3] = (carry_3[2] & 0x3f);
+                for(j = 0;j < (i + 1);j++)output += base64bin[carry_4[j]];
+                while((i++ < 3))output += '=';
+            }
+        }
+        return output; 
+    }
+    std::string base64_decode(const std::string& input) {
+        std::string output;
+        std::vector<unsigned char> vec(input.begin(), input.end());
+        std::vector<unsigned char> decoded;
+
+        // 先将每个base64字符转换为对应的6位值
+        for (char c : input) {
+            if (c == '=') break; // 填充字符，停止处理
+            size_t pos = base64bin.find(c);
+            if (pos != std::string::npos) {
+                decoded.push_back(pos);
+            }
+            else {
+                // 非法字符，忽略或处理错误
+                std::cerr << "error:" << c <<" isn't base64 char"<< std::endl;
+                exit(-1);
+            }
+        }
+
+        // 处理解码逻辑
+        for (size_t i = 0; i < decoded.size(); i += 4) {
+            unsigned char b1 = decoded[i];
+            unsigned char b2 = (i + 1 < decoded.size()) ? decoded[i + 1] : 0;
+            unsigned char b3 = (i + 2 < decoded.size()) ? decoded[i + 2] : 0;
+            unsigned char b4 = (i + 3 < decoded.size()) ? decoded[i + 3] : 0;
+
+            unsigned char c1 = (b1 << 2) | ((b2 & 0x30) >> 4);
+            unsigned char c2 = ((b2 & 0x0F) << 4) | ((b3 & 0x3C) >> 2);
+            unsigned char c3 = ((b3 & 0x03) << 6) | (b4 & 0x3F);
+
+            output += c1;
+            if (i + 2 < decoded.size()) output += c2;
+            if (i + 3 < decoded.size()) output += c3;
+        }
+
+        return output;
+    }
+public:
+    std::string base64(std::string date,bool mood){
+        std::string output; 
+        if(mood == true)output = base64_encode(date);
+        else output = base64_decode(date);
+        return output;
+    }
+};
+
+std::string duru(std::string whereFile) {
     filesystem::path filePath = whereFile;
 
     // 检查文件是否存在
@@ -276,23 +358,60 @@ int main(int argc,char*argv[]) {
     else return -1;
     short arrMY[5] = { 0,0,0,0,0 };
     string ls;
-    for(short i=0;i<5;i++){
-        if(argv[i+3] != nullptr)ls = argv[i+3];
-        else return -1;
-        arrMY[i] = stoi(ls);
-    } 
     if(mood == "jam"){
+        for(short i=0;i<5;i++){
+            if(argv[i+3] != nullptr)ls = argv[i+3];
+            else return -1;
+            arrMY[i] = stoi(ls);
+        } 
         NNGMJ nngmj;
         NNGMJ::MYANDDATA jmdata = nngmj.Nngmj(data, arrMY[0], arrMY[1], arrMY[2], arrMY[3], arrMY[4]);
         cout<<jmdata.Data<<endl;
-        xieru(whereFile,jmdata.Data);
+        xieru(whereFile+".ack",jmdata.Data);
     }
     if(mood == "jem"){
+        for(short i=0;i<5;i++){
+            if(argv[i+3] != nullptr)ls = argv[i+3];
+            else return -1;
+            arrMY[i] = stoi(ls);
+        } 
         NNGMJ nngmj;
         NNGMJ::MYANDDATA jemdata{data,arrMY[0],arrMY[1],arrMY[2],arrMY[3],arrMY[4]};
         string jMdata = nngmj.Decrypt(jemdata);
         cout << jMdata << endl;
-        xieru(whereFile,jMdata);
+        std::string filePath;
+        for(int i;i < (whereFile.length()-4);i++){
+            filePath += whereFile[i];
+        }
+        xieru(filePath,jMdata);
+    }
+    if(mood == "base64"){
+        bool bmood;
+        if(argv[3] != nullptr){
+            if (*argv[3] == '1')
+            {
+                bmood = true;
+            }else{
+                bmood = false;
+            }
+            
+        }
+        else return -1;
+        if(bmood == true){
+            BASE64 base64;
+            std::string output = move(base64.base64(move(duru(whereFile)),bmood));
+            xieru(whereFile+".base64",output);
+        }
+        if(bmood == false){
+            BASE64 base64;
+            string output = move(base64.base64(move(duru(whereFile)),bmood));
+            std::string filePath;
+            for (int i = 0; i < (whereFile.length() - 6); i++)
+            {
+                filePath += whereFile[i];
+            }
+            xieru(filePath+"debase64",output);
+        }
     }
     return 0;
 }
