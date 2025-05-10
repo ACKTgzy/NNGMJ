@@ -1,13 +1,15 @@
-#include<iostream>
+﻿#include<iostream>
 #include<filesystem>
 #include<fstream>
 #include<vector>
 using namespace std;
 
 class NNGMJ {
+    friend class ShanLan;
 private:
     short LS = 95;
-    char ZD[95] = { '5','y','+','8','H','=','z','F',',','A','i','E','4','Z','p','_','V','W',' ','X','k','s','b','D','r','C','6','S','2',';','"','a','c','n','\'','{','o','0','1','Q','(',')','}','[','R','t','u','M','q','7','w','x',']','\\','|','~','`','!','@','#','J','K','L','9','l','B','g','h','3','O','P','m','$','%','^','&','*','N','G','-','j','I','<','U','>','T','Y','/','?',':','d','.','e','f','v'};
+	short zzsize = 10;
+    char ZD[95] = { '5','y','+','8','H','=','z','F',',','A','i','E','4','Z','p','_','V','W',' ','X','k','s','b','D','r','C','6','S','2',';','"','a','c','n','\'','{','o','0','1','Q','(',')','}','[','R','t','u','M','q','7','w','x',']','\\','|','~','`','!','@','#','J','K','L','9','l','B','g','h','3','O','P','m','$','%','^','&','*','N','G','-','j','I','<','U','>','T','Y','/','?',':','d','.','e','f','v' };
     short MY[5];
 public:
     struct MYANDDATA {
@@ -18,7 +20,7 @@ public:
         for (short i = 0; i < LS; i++) {
             if (ZD[i] == b)return i;
         }
-        cout<<"error"<<endl;
+        cout << "error" << endl;
         exit(-1);
     }
     MYANDDATA Nngmj(std::string data, short m1 = 5, short m2 = 5, short m3 = 5, short m4 = 5, short m5 = 5) {
@@ -127,7 +129,7 @@ public:
             case '+':
             case '=':
             case ' ':
-                sdata.Data += ZD[((m5 * 2401) + (m4 * 343) + (m3 * 49) + (m2 * 7) + m1 + whereZD(a)) % LS];
+                sdata.Data += ZD[((m5 * zzsize * zzsize * zzsize * zzsize) + (m4 * zzsize * zzsize * zzsize) + (m3 * zzsize * zzsize) + (m2 * zzsize) + m1 + whereZD(a)) % LS];
                 m1++;
                 break;
             default:
@@ -135,23 +137,23 @@ public:
                 m1++;
                 break;
             }
-            if (m1 == 7) {
+            if (m1 == zzsize) {
                 m1 = 0;
                 m2++;
             }
-            if (m2 == 7) {
+            if (m2 == zzsize) {
                 m2 = 0;
                 m3++;
             }
-            if (m3 == 7) {
+            if (m3 == zzsize) {
                 m3 = 0;
                 m4++;
             }
-            if (m4 == 7) {
+            if (m4 == zzsize) {
                 m4 = 0;
                 m5++;
             }
-            if (m5 == 7) {
+            if (m5 == zzsize) {
                 m5 = 0;
             }
         }
@@ -170,7 +172,7 @@ public:
             short encryptedIndex = whereZD(encryptedChar);
             if (encryptedIndex != -1) {
                 // 逆向计算原始字符的索引
-                short originalIndex = ((encryptedIndex - ((m5 * 2401) + (m4 * 343) + (m3 * 49) + (m2 * 7) + m1) + LS * 100) % LS);
+                short originalIndex = ((encryptedIndex - ((m5 * zzsize * zzsize * zzsize * zzsize) + (m4 * zzsize * zzsize * zzsize) + (m3 * zzsize * zzsize) + (m2 * zzsize) + m1) + LS * 100) % LS);
                 if (originalIndex < 0)originalIndex += LS;
                 originalData += ZD[originalIndex];
             }
@@ -179,23 +181,23 @@ public:
             }
             // 更新状态
             m1++;
-            if (m1 == 7) {
+            if (m1 == zzsize) {
                 m1 = 0;
                 m2++;
             }
-            if (m2 == 7) {
+            if (m2 == zzsize) {
                 m2 = 0;
                 m3++;
             }
-            if (m3 == 7) {
+            if (m3 == zzsize) {
                 m3 = 0;
                 m4++;
             }
-            if (m4 == 7) {
+            if (m4 == zzsize) {
                 m4 = 0;
                 m5++;
             }
-            if (m5 == 7) {
+            if (m5 == zzsize) {
                 m5 = 0;
             }
         }
@@ -203,39 +205,119 @@ public:
     }
 };
 
-class BASE64{
+class ShanLan
+{
+private:
+    string encryptRailFence(string text, int key) {
+        if (key == 1) return text;
+
+        vector<string> rails(key);
+        int direction = -1;
+        int row = 0;
+
+        for (char c : text) {
+            rails[row] += c;
+            if (row == 0 || row == key - 1) {
+                direction = -direction;
+            }
+            row += direction;
+        }
+
+        string encrypted;
+        for (const string& rail : rails) {
+            encrypted += rail;
+        }
+
+        return encrypted;
+    }
+    string decryptRailFence(string encrypted, int key) {
+        if (key == 1) return encrypted;
+
+        vector<string> rails(key);
+        vector<int> rowLengths(key, 0);
+        int direction = -1;
+        int row = 0;
+
+        // 计算每一行的长度
+        for (char c : encrypted) {
+            rowLengths[row]++;
+            if (row == 0 || row == key - 1) {
+                direction = -direction;
+            }
+            row += direction;
+        }
+
+        // 将密文按行分割
+        int index = 0;
+        for (int i = 0; i < key; i++) {
+            rails[i] = encrypted.substr(index, rowLengths[i]);
+            index += rowLengths[i];
+        }
+
+        // 重建明文
+        string decrypted;
+        direction = -1;
+        row = 0;
+        vector<int> currentPos(key, 0);
+
+        for (char c : encrypted) {
+            decrypted += rails[row][currentPos[row]++];
+            if (row == 0 || row == key - 1) {
+                direction = -direction;
+            }
+            row += direction;
+        }
+
+        return decrypted;
+    }
+
+public:
+    std::string shanlan(std::string input,bool mood) {
+        string output;
+        NNGMJ nngmj;
+        int key = 0;
+        key = nngmj.whereZD(input[0]);
+        if ((key == 0) || (key == 1))key = 2;
+        if (mood == true)output = encryptRailFence(input, key);
+		if (mood == false)output = decryptRailFence(input, key);
+        return output;
+    }
+};
+
+
+class BASE64 {
     friend class NNGMJ;
 private:
     const std::string base64bin = "ASDFGHJKLZXCVBNMQWERTYUIOPasdfghjklzxcvbnmqwertyuiop1234567890+/";
-    std::string base64_encode(const std::string &input){
+    std::string base64_encode(const std::string& input) {
         std::string output;
-        short i=0;
-        short j=0;
+        short i = 0;
+        short j = 0;
         unsigned char carry_3[3];
         unsigned char carry_4[4];
-        for(const char c : input){
+        for (const char c : input) {
             carry_3[i++] = c;
-            if(i == 3){
+            if (i == 3) {
                 carry_4[0] = (carry_3[0] & 0xfc) >> 2;
                 carry_4[1] = ((carry_3[0] & 0x03) << 4) + ((carry_3[1] & 0xf0) >> 4);
                 carry_4[2] = ((carry_3[1] & 0x0f) << 2) + ((carry_3[2] & 0xc0) >> 6);
                 carry_4[3] = (carry_3[2] & 0x3f);
-                for(i = 0;i < 4;i++)output += base64bin[carry_4[i]];
+                for (i = 0; i < 4; i++)output += base64bin[carry_4[i]];
                 i = 0;
             }
         }
-        if(i > 0){
-            for(j = i;j < 3;j++){
+        if (i > 0) {
+            for (j = i; j < 3; j++) {
                 carry_3[j] = '\0';
                 carry_4[0] = (carry_3[0] & 0xfc) >> 2;
                 carry_4[1] = ((carry_3[0] & 0x03) << 4) + ((carry_3[1] & 0xf0) >> 4);
                 carry_4[2] = ((carry_3[1] & 0x0f) << 2) + ((carry_3[2] & 0xc0) >> 6);
                 carry_4[3] = (carry_3[2] & 0x3f);
-                for(j = 0;j < (i + 1);j++)output += base64bin[carry_4[j]];
-                while((i++ < 3))output += '=';
+                for (j = 0; j < (i + 1); j++)output += base64bin[carry_4[j]];
+                while ((i++ < 3))output += '=';
             }
         }
-        return output; 
+        return output;
     }
     std::string base64_decode(const std::string& input) {
         std::string output;
@@ -251,7 +333,7 @@ private:
             }
             else {
                 // 非法字符，忽略或处理错误
-                std::cerr << "error:" << c <<" isn't base64 char"<< std::endl;
+                std::cerr << "error:" << c << " isn't base64 char" << std::endl;
                 exit(-1);
             }
         }
@@ -275,9 +357,9 @@ private:
         return output;
     }
 public:
-    std::string base64(std::string date,bool mood){
-        std::string output; 
-        if(mood == true)output = base64_encode(date);
+    std::string base64(std::string date, bool mood) {
+        std::string output;
+        if (mood == true)output = base64_encode(date);
         else output = base64_decode(date);
         return output;
     }
@@ -348,69 +430,99 @@ void xieru(filesystem::path filePath, string data) {
 
 
 
-int main(int argc,char*argv[]) {
+int main(int argc, char* argv[]) {
     string whereFile;
-    if(argv[1] != nullptr)whereFile = argv[1];
+    if (argv[1] != nullptr)whereFile = argv[1];
     else return -1;
     string data = duru(whereFile);
     string mood;
-    if(argv[2] != nullptr)mood = argv[2];
+    if (argv[2] != nullptr)mood = argv[2];
     else return -1;
     short arrMY[5] = { 0,0,0,0,0 };
     string ls;
-    if(mood == "jam"){
-        for(short i=0;i<5;i++){
-            if(argv[i+3] != nullptr)ls = argv[i+3];
+    if (mood == "jam") {
+        for (short i = 0; i < 5; i++) {
+            if (argv[i + 3] != nullptr)ls = argv[i + 3];
             else return -1;
             arrMY[i] = stoi(ls);
-        } 
+        }
         NNGMJ nngmj;
         NNGMJ::MYANDDATA jmdata = nngmj.Nngmj(data, arrMY[0], arrMY[1], arrMY[2], arrMY[3], arrMY[4]);
-        cout<<jmdata.Data<<endl;
-        xieru(whereFile+".ack",jmdata.Data);
+        cout << jmdata.Data << endl;
+        xieru(whereFile + ".ack", jmdata.Data);
     }
-    if(mood == "jem"){
-        for(short i=0;i<5;i++){
-            if(argv[i+3] != nullptr)ls = argv[i+3];
+    if (mood == "jem") {
+        for (short i = 0; i < 5; i++) {
+            if (argv[i + 3] != nullptr)ls = argv[i + 3];
             else return -1;
             arrMY[i] = stoi(ls);
-        } 
+        }
         NNGMJ nngmj;
-        NNGMJ::MYANDDATA jemdata{data,arrMY[0],arrMY[1],arrMY[2],arrMY[3],arrMY[4]};
+        NNGMJ::MYANDDATA jemdata{ data,arrMY[0],arrMY[1],arrMY[2],arrMY[3],arrMY[4] };
         string jMdata = nngmj.Decrypt(jemdata);
         cout << jMdata << endl;
         std::string filePath;
-        for(int i;i < (whereFile.length()-4);i++){
+        for (int i = 0; i < (whereFile.length() - 4); i++) {
             filePath += whereFile[i];
         }
-        xieru(filePath,jMdata);
+        xieru(filePath, jMdata);
     }
-    if(mood == "base64"){
+    if (mood == "base64") {
         bool bmood;
-        if(argv[3] != nullptr){
+        if (argv[3] != nullptr) {
             if (*argv[3] == '1')
             {
                 bmood = true;
-            }else{
+            }
+            else {
                 bmood = false;
             }
-            
+
         }
         else return -1;
-        if(bmood == true){
+        if (bmood == true) {
             BASE64 base64;
-            std::string output = move(base64.base64(move(duru(whereFile)),bmood));
-            xieru(whereFile+".base64",output);
+            std::string output = move(base64.base64(move(duru(whereFile)), bmood));
+            xieru(whereFile + ".base64", output);
         }
-        if(bmood == false){
+        if (bmood == false) {
             BASE64 base64;
-            string output = move(base64.base64(move(duru(whereFile)),bmood));
+            string output = move(base64.base64(move(duru(whereFile)), bmood));
             std::string filePath;
             for (int i = 0; i < (whereFile.length() - 6); i++)
             {
                 filePath += whereFile[i];
             }
-            xieru(filePath+"debase64",output);
+            xieru(filePath, output);
+        }
+    }
+    if (mood == "shanlan") {
+        bool bmood;
+        if (argv[3] != nullptr) {
+            if (*argv[3] == '1')
+            {
+                bmood = true;
+            }
+            else {
+                bmood = false;
+            }
+
+        }
+        else return -1;
+        if (bmood == true) {
+			ShanLan shanlan;
+            std::string output = move(shanlan.shanlan(move(duru(whereFile)), bmood));
+            xieru(whereFile + ".shanlan", output);
+        }
+        if (bmood == false) {
+			ShanLan shanlan;
+            string output = move(shanlan.shanlan(move(duru(whereFile)), bmood));
+            std::string filePath;
+            for (int i = 0; i < (whereFile.length() - 8); i++)
+            {
+                filePath += whereFile[i];
+            }
+            xieru(filePath, output);
         }
     }
     return 0;
